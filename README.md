@@ -1,6 +1,6 @@
 # Merge TL: Scripts to generate trained models for merged datsets using flowcat api
 
-## Approach: For each datset, generate 2 models: one without any knowledge transfer and a second one with knowledge transfer from the base model
+## For each datset, generate 2 models: one without any knowledge transfer and a second one with knowledge transfer from the base model
 
 ### Scripts
 1. **generate_ref_som.py:** generate reference SOM for merged base dataset(MLL9F). We will use this reference SOM for generating individual SOMs for each dataset.

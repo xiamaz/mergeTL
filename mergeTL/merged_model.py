@@ -25,8 +25,8 @@ if __name__ == "__main__":
         print_usage()
         raise Exception("Invalid arguments")
 
-    SOM_DATASET = sys.argv[1]
-    OUTPUT = sys.argv[2]
+    SOM_DATASET = utils.URLPath(sys.argv[1])
+    OUTPUT = utils.URLPath(sys.argv[2])
     PANEL = sys.argv[3]
 
     LOGGER = utils.logs.setup_logging(None, "merged model")

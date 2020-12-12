@@ -166,7 +166,7 @@ if __name__ == "__main__":
         "bonn": {
             "output_path": OUTPUT / "bonn",
             "som_dataset_path": "/data/flowcat-data/2020_Nov_rerun/Merged_SOM/Bonn/with_9F_ref",
-            "panel": "MLL",
+            "panel": "BONN",
             "base_model_path": "/data/flowcat-data/2020_Nov_rerun/Merged_model/MLL9F_Bonn_Berlin",
             "k_number": 5,
             "rerun": False,
@@ -175,7 +175,7 @@ if __name__ == "__main__":
         "berlin": {
             "output_path": OUTPUT / "berlin",
             "som_dataset_path": "/data/flowcat-data/2020_Nov_rerun/Merged_SOM/Berlin",
-            "panel": "MLL",
+            "panel": "BERLIN",
             "base_model_path": "/data/flowcat-data/2020_Nov_rerun/Merged_model/MLL9F_Bonn_Berlin",
             "k_number": 5,
             "rerun": False,

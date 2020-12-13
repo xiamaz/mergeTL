@@ -23,43 +23,16 @@ from flowcat.classifier.predictions import generate_all_metrics
 from transfer_learning_model import create_model
 
 
-def create_tl_model(base_model, config, modelfun=create_model):
-    weights = base_model.get_weights()
-
-    model = create_model(config.inputs, config.output)
-    model.set_weights(weights)
-
-    model.summary(print_fn=LOGGER.info)
-
-    model.get_layer('dense_1').trainable = False
-    model.get_layer('dense_2').trainable = False
-
-    model.compile(
-        loss=config.get_loss(modeldir=None),
-        optimizer="adam", metrics=["accuracy"])
-    return model
-
-
-def run_transfer(options, train_dataset, validate_dataset):
+def run_denovo(options, train_dataset, validate_dataset):
     config = options["config"]
 
-    base_model = models.load_model(options["base_model_path"])
-
-    tl_model = create_tl_model(base_model, config)
-
-    model = SOMClassifier(config, tl_model)
-    train = model.create_sequence(train_dataset, config.train_batch_size)
-
-    if validate_dataset is not None:
-        validate = model.create_sequence(validate_dataset, config.valid_batch_size)
-    else:
-        validate = None
-
-    model.train_generator(train, validate, epochs=config.train_epochs, class_weight=None)
+    model = train_som_classifier(train_dataset, validate_dataset, config)
 
     output = utils.URLPath(options["output_path"])
 
-    if validate:
+    if validate_dataset:
+        validate = model.create_sequence(validate_dataset, config.valid_batch_size)
+
         pred_arr, pred_labels = model.predict_generator(validate)
         true_labels = validate.true_labels
         pred_df = pd.DataFrame(pred_arr, columns=validate.binarizer.classes_, index=validate.dataset.labels)
@@ -105,7 +78,7 @@ def create_kfold_split(dataset, k_number, stratified=False) -> [("SOMDataset", "
     return split_datasets
 
 
-def run_kfold(*, output_path, base_model_path, som_dataset_path, k_number=5, panel="MLL", rerun=False, stratified=False,):
+def run_kfold(*, output_path, som_dataset_path, k_number=5, panel="MLL", rerun=False, stratified=False,):
     if not rerun and output_path.exists():
         LOGGER.info("Existing results exist at %s skipping", output_path)
         return
@@ -136,7 +109,6 @@ def run_kfold(*, output_path, base_model_path, som_dataset_path, k_number=5, pan
 
         # change epochs to suit each dataset
         options = {
-            "base_model_path": str(base_model_path / "model.h5"),
             "output_path": output_path / f"kfold_n{n}",
             "config": classifier.SOMClassifierConfig(**{
                 "tubes": {tube: dataset.config[tube] for tube in tubes},
@@ -144,21 +116,20 @@ def run_kfold(*, output_path, base_model_path, som_dataset_path, k_number=5, pan
                 "pad_width": 2,
                 "mapping": mapping,
                 "cost_matrix": None,
-                "train_epochs": 15,
+                "train_epochs": 20,
             })
         }
-        run_transfer(options, train_dataset, validate_dataset)
+        run_denovo(options, train_dataset, validate_dataset)
 
 
 if __name__ == "__main__":
-    OUTPUT = utils.URLPath("/data/flowcat-data/2020-12_kfold_n10")
+    OUTPUT = utils.URLPath("/data/flowcat-data/2020-12_kfold_n10_denovo")
     LOGGER = utils.logs.setup_logging(OUTPUT / "logs.txt", "merged model with TL")
     experiments = {
         "mll5f": {
             "output_path": OUTPUT / "mll5f",
             "som_dataset_path": "/data/flowcat-data/2020_Nov_rerun/Merged_SOM/MLL5F",
             "panel": "MLL",
-            "base_model_path": "/data/flowcat-data/2020_Nov_rerun/Merged_model/MLL9F",
             "k_number": 10,
             "rerun": False,
             "stratified": False,
@@ -167,7 +138,6 @@ if __name__ == "__main__":
             "output_path": OUTPUT / "bonn",
             "som_dataset_path": "/data/flowcat-data/2020_Nov_rerun/Merged_SOM/Bonn/with_9F_ref",
             "panel": "BONN",
-            "base_model_path": "/data/flowcat-data/2020_Nov_rerun/Merged_model/MLL9F_Bonn_Berlin",
             "k_number": 10,
             "rerun": False,
             "stratified": False,
@@ -176,7 +146,6 @@ if __name__ == "__main__":
             "output_path": OUTPUT / "berlin",
             "som_dataset_path": "/data/flowcat-data/2020_Nov_rerun/Merged_SOM/Berlin",
             "panel": "BERLIN",
-            "base_model_path": "/data/flowcat-data/2020_Nov_rerun/Merged_model/MLL9F_Bonn_Berlin",
             "k_number": 10,
             "rerun": False,
             "stratified": False,

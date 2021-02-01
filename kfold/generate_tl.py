@@ -81,9 +81,9 @@ def create_kfold_split(dataset, k_number, stratified=False) -> [("SOMDataset", "
         for somsample in dataset.data:
             group_lists[somsample.group].append(somsample)
 
-        if any(len(v) < k_number for v in group_lists.values()):
-            group_counts = {k: len(v) for k, v in group_lists.items()}
-            raise ValueError("K number {k_number} smaller than: {group_counts}")
+         if any(len(v) < k_number for v in group_lists.values()):
+             group_counts = {k: len(v) for k, v in group_lists.items()}
+             raise ValueError("K number {k_number} smaller than: {group_counts}")
 
         group_splits = []
         for group, samples in group_lists.items():
@@ -116,6 +116,8 @@ def run_kfold(*, output_path, base_model_path, som_dataset_path, k_number=5, pan
     # set the groups according to the panel
     if panel == "MLL":
         groups = GROUPS
+    elif panel == "ERLANGEN":
+         groups = ["CLL", "MBL", "MCL", "LPL", "MZL", "FL", "HCL", "normal"]
     else:
         groups = ["CLL", "MCL", "LPL", "MZL", "FL", "HCL", "normal"]
 
@@ -151,7 +153,7 @@ def run_kfold(*, output_path, base_model_path, som_dataset_path, k_number=5, pan
 
 
 if __name__ == "__main__":
-    OUTPUT = utils.URLPath("/data/flowcat-data/2020-12_kfold_n10")
+    OUTPUT = utils.URLPath("/data/flowcat-data/2021-01_kfold_n10_startified")
     LOGGER = utils.logs.setup_logging(OUTPUT / "logs.txt", "merged model with TL")
     experiments = {
         "mll5f": {
@@ -181,6 +183,16 @@ if __name__ == "__main__":
             "rerun": False,
             "stratified": False,
         },
+        "erlangen": {
+            "output_path": OUTPUT / "erlangen",
+            "som_dataset_path": "/data/flowcat-data/2020_Nov_erlangen_results/Merged_SOM/With_9F_ref/9F_markers",
+            "panel": "ERLANGEN",
+            "base_model_path": "/data/flowcat-data/2020-04_merged_train/MLL9F/Models/model_erlangen_groups",
+            "k_number": 10,
+            "rerun": False,
+            "stratified": False,
+        },
+
     }
 
     for name, config in experiments.items():

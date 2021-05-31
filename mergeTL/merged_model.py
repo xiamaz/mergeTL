@@ -4,6 +4,7 @@ same parameters as th unmerged model
 """
 import os
 import sys
+import pickle
 
 from flowcat import utils, classifier, io_functions
 from flowcat.constants import GROUPS
@@ -21,13 +22,14 @@ def print_usage():
 
 
 if __name__ == "__main__":
-    if len(sys.argv) != 4:
+    if len(sys.argv) != 5:
         print_usage()
         raise Exception("Invalid arguments")
 
     SOM_DATASET = utils.URLPath(sys.argv[1])
     OUTPUT = utils.URLPath(sys.argv[2])
     PANEL = sys.argv[3]
+    EPOCHS = int(sys.argv[4])
 
     LOGGER = utils.logs.setup_logging(None, "merged model")
 
@@ -61,10 +63,15 @@ if __name__ == "__main__":
         "pad_width": 2,
         "mapping": mapping,
         "cost_matrix": None,
-        "train_epochs": 20,
+        "train_epochs": EPOCHS,
     })
 
     model = train_som_classifier(train_dataset, validate_dataset, config)
 
     model.save(OUTPUT)
     model.save_information(OUTPUT)
+
+    for i, (_, history) in enumerate(model.training_history):
+        hist_output = OUTPUT / f"history_{i}.pb"
+        with open(str(hist_output), "wb") as f:
+            pickle.dump(history.history, f)

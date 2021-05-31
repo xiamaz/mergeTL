@@ -75,7 +75,7 @@ def create_model(input_shapes, yshape, global_decay=5e-6) -> models.Model:
 def print_usage():
     """print syntax of script invocation"""
     print("\nUsage:")
-    print("python {0:} SOM_datapath outputpath panel(Erlangen, Bonn, MLL,"
+    print("python {0:} SOM_datapath outputpath panel(Bonn, MLL,"
           "or Berlin) basemodel_path\n".format(
         os.path.basename(sys.argv[0])))
     return
@@ -95,12 +95,8 @@ if __name__ == "__main__":
     LOGGER = utils.logs.setup_logging(None, "merged model with TL")
 
     # set the groups according to the panel
-    if panel == "MLL":
+    if PANEL == "MLL":
         groups = GROUPS
-        
-    elif panel == "ERLANGEN":
-         groups = ["CLL", "MBL", "MCL", "LPL", "MZL", "FL", "HCL", "normal"]
-         
     else:
         groups = ["CLL", "MCL", "LPL", "MZL", "FL", "HCL", "normal"]
 
@@ -114,17 +110,17 @@ if __name__ == "__main__":
     train_dataset, validate_dataset = prepare_classifier_train_dataset(dataset, groups=groups, mapping=mapping,
                                                                        balance=None)
 
-    # print(train_dataset.group_count)
-    # print(validate_dataset.group_count)
+    print(train_dataset.group_count)
+    print(validate_dataset.group_count)
 
-    # # resplit normal in train and validate
-    # normal_ratio = 0.25
-    # non_normals = [d for d in train_dataset.data if d.group != "normal"]
-    # normals = [d for d in train_dataset.data if d.group == "normal"]
-    # random.shuffle(normals)
-    # train_data = non_normals + normals[:int(len(normals) * normal_ratio)]
-    # validate_dataset.data = pd.Series(list(validate_dataset.data)+normals[int(len(normals) * normal_ratio):])
-    # train_dataset = SOMDataset(pd.Series(train_data), train_dataset.config)
+    # resplit normal in train and validate
+    normal_ratio = 0.25
+    non_normals = [d for d in train_dataset.data if d.group != "normal"]
+    normals = [d for d in train_dataset.data if d.group == "normal"]
+    random.shuffle(normals)
+    train_data = non_normals + normals[:int(len(normals) * normal_ratio)]
+    validate_dataset.data = pd.Series(list(validate_dataset.data)+normals[int(len(normals) * normal_ratio):])
+    train_dataset = SOMDataset(pd.Series(train_data), train_dataset.config)
 
     print(train_dataset.group_count)
     print(validate_dataset.group_count)

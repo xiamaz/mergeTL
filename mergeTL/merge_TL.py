@@ -71,7 +71,7 @@ def create_model(input_shapes, yshape, global_decay=5e-6) -> models.Model:
 def print_usage():
     """print syntax of script invocation"""
     print("\nUsage:")
-    print("python {0:} SOM_datapath outputpath panel(Bonn, MLL,"
+    print("python {0:} SOM_datapath outputpath panel(Erlangen, Bonn, MLL,"
           "or Berlin) basemodel_path\n".format(
         os.path.basename(sys.argv[0])))
     return
@@ -90,8 +90,12 @@ if __name__ == "__main__":
     LOGGER = utils.logs.setup_logging(None, "merged model with TL")
 
     # set the groups according to the panel
-    if PANEL == "MLL":
+    if panel == "MLL":
         groups = GROUPS
+        
+    elif panel == "ERLANGEN":
+         groups = ["CLL", "MBL", "MCL", "LPL", "MZL", "FL", "HCL", "normal"]
+         
     else:
         groups = ["CLL", "MCL", "LPL", "MZL", "FL", "HCL", "normal"]
 

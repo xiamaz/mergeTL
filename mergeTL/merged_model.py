@@ -14,7 +14,7 @@ from flowcat.flowcat_api import train_som_classifier, prepare_classifier_train_d
 def print_usage():
     """print syntax of script invocation"""
     print("\nUsage:")
-    print("python {0:} SOM_datapath outputpath panel(Bonn, MLL,"
+    print("python {0:} SOM_datapath outputpath panel(Erlangen, Bonn, MLL,"
           "or Berlin)\n".format(
         os.path.basename(sys.argv[0])))
     return
@@ -32,8 +32,12 @@ if __name__ == "__main__":
     LOGGER = utils.logs.setup_logging(None, "merged model")
 
     # set the groups according to the panel
-    if PANEL == "MLL":
+    if panel == "MLL":
         groups = GROUPS
+        
+    elif panel == "ERLANGEN":
+         groups = ["CLL", "MBL", "MCL", "LPL", "MZL", "FL", "HCL", "normal"]
+         
     else:
         groups = ["CLL", "MCL", "LPL", "MZL", "FL", "HCL", "normal"]
 
